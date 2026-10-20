@@ -2,48 +2,55 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Locked viewport: no zoom, no scale, covers notches -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Not My Problem™</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
     <style>
-        * {
+        /* LOCK DOWN THE PAGE: No scroll, no zoom, no bounce */
+        html, body {
+            height: 100%;
+            width: 100%;
+            overflow: hidden;
             margin: 0;
             padding: 0;
-            box-sizing: border-box;
+            touch-action: none; /* Prevents all panning/zooming gestures */
+            -webkit-text-size-adjust: 100%; /* Prevents iOS auto-zoom on text */
+            -webkit-tap-highlight-color: transparent;
         }
 
         body {
             font-family: 'Inter', sans-serif;
-            min-height: 100vh;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
             background: linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%);
             color: #ffffff;
-            padding: 20px;
-            overflow-x: hidden;
+            padding: 16px;
+            position: relative;
             transition: transform 0.1s ease;
         }
 
         body.shake {
-            animation: shake 0.5s ease;
+            animation: shake 0.4s cubic-bezier(.36,.07,.19,.97) both;
         }
 
         @keyframes shake {
-            0%, 100% { transform: translateX(0); }
-            10%, 30%, 50%, 70%, 90% { transform: translateX(-10px); }
-            20%, 40%, 60%, 80% { transform: translateX(10px); }
+            10%, 90% { transform: translate3d(-4px, 0, 0); }
+            20%, 80% { transform: translate3d(6px, 0, 0); }
+            30%, 50%, 70% { transform: translate3d(-8px, 0, 0); }
+            40%, 60% { transform: translate3d(8px, 0, 0); }
         }
 
         .flash-overlay {
             position: fixed;
             top: 0;
             left: 0;
-            width: 100%;
-            height: 100%;
+            width: 100vw;
+            height: 100vh;
             background: #ff0000;
             opacity: 0;
             pointer-events: none;
@@ -51,12 +58,12 @@
         }
 
         .flash-overlay.active {
-            animation: flash 0.3s ease;
+            animation: flash 0.25s ease-out;
         }
 
         @keyframes flash {
             0% { opacity: 0; }
-            50% { opacity: 0.8; }
+            30% { opacity: 0.7; }
             100% { opacity: 0; }
         }
 
@@ -65,122 +72,101 @@
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%) scale(0);
-            font-size: 120px;
+            font-size: 25vw;
             font-weight: 900;
             color: #ff0000;
-            text-shadow: 0 0 20px rgba(255, 0, 0, 0.8);
+            text-shadow: 0 0 30px rgba(255, 0, 0, 0.9);
             pointer-events: none;
             z-index: 9998;
             opacity: 0;
+            line-height: 1;
         }
 
         .jumpscare-text.active {
-            animation: jumpscare 0.6s ease;
+            animation: jumpscare 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
 
         @keyframes jumpscare {
-            0% {
-                transform: translate(-50%, -50%) scale(0);
-                opacity: 0;
-            }
-            30% {
-                transform: translate(-50%, -50%) scale(1.5);
-                opacity: 1;
-            }
-            70% {
-                transform: translate(-50%, -50%) scale(1.2);
-                opacity: 1;
-            }
-            100% {
-                transform: translate(-50%, -50%) scale(0);
-                opacity: 0;
-            }
+            0% { transform: translate(-50%, -50%) scale(0); opacity: 0; }
+            40% { transform: translate(-50%, -50%) scale(1.3); opacity: 1; }
+            70% { transform: translate(-50%, -50%) scale(1.1); opacity: 1; }
+            100% { transform: translate(-50%, -50%) scale(0); opacity: 0; }
         }
 
         .container {
-            max-width: 400px;
             width: 100%;
+            max-width: 400px;
             text-align: center;
-            animation: fadeInUp 0.8s ease-out;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            animation: fadeInUp 0.6s ease-out;
+            max-height: 95vh; /* Ensure it never exceeds screen height */
         }
 
         @keyframes fadeInUp {
-            from {
-                opacity: 0;
-                transform: translateY(30px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
+        /* IMAGE CONTAINER: Frames any aspect ratio perfectly */
         .image-wrapper {
             width: 100%;
+            max-width: 340px;
             aspect-ratio: 1 / 1;
-            border-radius: 24px;
+            border-radius: 20px;
             overflow: hidden;
-            margin-bottom: 24px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
-            position: relative;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            margin: 0 auto 20px auto;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.5);
+            background: #16152b; /* Dark frame for transparent/odd-sized GIFs */
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
         }
 
         .image-wrapper img {
             width: 100%;
             height: 100%;
-            object-fit: cover;
+            object-fit: contain; /* KEY: Holds varying sizes nicely without cropping or stretching */
             display: block;
-        }
-
-        .image-placeholder {
-            width: 100%;
-            height: 100%;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: rgba(255, 255, 255, 0.9);
-            font-size: 14px;
-            padding: 20px;
-        }
-
-        .image-placeholder .emoji {
-            font-size: 64px;
-            margin-bottom: 12px;
+            pointer-events: none; /* Prevents long-press save menu on some phones */
         }
 
         .badge {
             display: inline-block;
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
             padding: 6px 14px;
             border-radius: 20px;
             font-size: 11px;
             font-weight: 600;
             text-transform: uppercase;
             letter-spacing: 1.5px;
-            margin-bottom: 16px;
+            margin-bottom: 14px;
             color: rgba(255, 255, 255, 0.9);
+            flex-shrink: 0;
         }
 
         .quote {
             font-family: 'Space Grotesk', sans-serif;
-            font-size: 28px;
+            font-size: clamp(24px, 7vw, 32px); /* Responsive font size */
             font-weight: 700;
-            line-height: 1.3;
-            margin-bottom: 12px;
-            color: #ffffff;
-            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+            line-height: 1.25;
+            margin-bottom: 10px;
+            color: #ffffff; /* Solid white, no gradient clipping issues */
+            text-shadow: 0 2px 15px rgba(0, 0, 0, 0.5);
+            padding: 0 10px;
         }
 
         .subtitle {
-            font-size: 14px;
-            color: rgba(255, 255, 255, 0.7);
-            margin-bottom: 32px;
+            font-size: 13px;
+            color: rgba(255, 255, 255, 0.6);
+            margin-bottom: 24px;
             font-weight: 400;
+            flex-shrink: 0;
         }
 
         .reload-btn {
@@ -188,26 +174,23 @@
             align-items: center;
             gap: 8px;
             background: rgba(255, 255, 255, 0.08);
-            backdrop-filter: blur(10px);
+            backdrop-filter: blur(8px);
             border: 1px solid rgba(255, 255, 255, 0.15);
             color: #ffffff;
-            padding: 14px 28px;
+            padding: 14px 24px;
             border-radius: 50px;
             font-size: 14px;
             font-weight: 600;
             cursor: pointer;
-            transition: all 0.3s ease;
+            transition: all 0.2s ease;
             font-family: 'Inter', sans-serif;
-        }
-
-        .reload-btn:hover {
-            background: rgba(255, 255, 255, 0.15);
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+            flex-shrink: 0;
+            -webkit-tap-highlight-color: transparent;
         }
 
         .reload-btn:active {
-            transform: translateY(0);
+            background: rgba(255, 255, 255, 0.2);
+            transform: scale(0.96);
         }
 
         .reload-btn svg {
@@ -216,22 +199,19 @@
             transition: transform 0.3s ease;
         }
 
-        .reload-btn:hover svg {
+        .reload-btn:active svg {
             transform: rotate(180deg);
         }
 
         .footer {
-            margin-top: 40px;
-            font-size: 11px;
-            color: rgba(255, 255, 255, 0.5);
+            margin-top: 20px;
+            font-size: 10px;
+            color: rgba(255, 255, 255, 0.3);
             letter-spacing: 0.5px;
+            flex-shrink: 0;
         }
 
-        .footer a {
-            color: rgba(255, 255, 255, 0.7);
-            text-decoration: none;
-        }
-
+        /* Floating particles */
         .particles {
             position: fixed;
             top: 0;
@@ -245,28 +225,18 @@
 
         .particle {
             position: absolute;
-            width: 4px;
-            height: 4px;
-            background: rgba(255, 255, 255, 0.1);
+            width: 3px;
+            height: 3px;
+            background: rgba(255, 255, 255, 0.08);
             border-radius: 50%;
             animation: float linear infinite;
         }
 
         @keyframes float {
-            0% {
-                transform: translateY(100vh) rotate(0deg);
-                opacity: 0;
-            }
-            10% {
-                opacity: 1;
-            }
-            90% {
-                opacity: 1;
-            }
-            100% {
-                transform: translateY(-100px) rotate(720deg);
-                opacity: 0;
-            }
+            0% { transform: translateY(100vh) rotate(0deg); opacity: 0; }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            100% { transform: translateY(-50px) rotate(360deg); opacity: 0; }
         }
     </style>
 </head>
@@ -277,23 +247,19 @@
 
     <div class="container">
         <div class="image-wrapper">
-            <div class="image-placeholder">
-                <div class="emoji">🤷</div>
-                <span>Replace with your own image</span>
-                <span style="font-size: 11px; margin-top: 4px; opacity: 0.6;">See HTML comments for instructions</span>
-            </div>
+            <img id="memeImage" src="" alt="Reaction GIF">
         </div>
 
         <div class="badge">Official Response</div>
         <h1 class="quote" id="quote">Loading...</h1>
         <p class="subtitle">— Management approved this message</p>
 
-        <button class="reload-btn" onclick="location.reload()">
+        <button class="reload-btn" id="reloadBtn">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                 <polyline points="23 4 23 10 17 10"></polyline>
                 <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
             </svg>
-            Get another response
+            Next
         </button>
 
         <div class="footer">
@@ -302,7 +268,53 @@
     </div>
 
     <script>
-        // Blunt, dismissive phrases
+        // 1. PREVENT ALL SCROLL/ZOOM/MOVEMENT
+        document.addEventListener('touchmove', function(e) {
+            e.preventDefault();
+        }, { passive: false });
+        
+        document.addEventListener('gesturestart', function(e) {
+            e.preventDefault();
+        });
+
+        // 2. THE 33 IMAGES
+        const imageUrls = [
+            "https://shares.oorion.uk/u/cRX.gif",
+            "https://shares.oorion.uk/u/Gtj.gif",
+            "https://shares.oorion.uk/u/AWw.gif",
+            "https://shares.oorion.uk/u/UKP.gif",
+            "https://shares.oorion.uk/u/Ivv.gif",
+            "https://shares.oorion.uk/u/iS8.gif",
+            "https://shares.oorion.uk/u/lDC.gif",
+            "https://shares.oorion.uk/u/dcL.gif",
+            "https://shares.oorion.uk/u/5fB.gif",
+            "https://shares.oorion.uk/u/zHj.gif",
+            "https://shares.oorion.uk/u/9Cg.gif",
+            "https://shares.oorion.uk/u/1b9.gif",
+            "https://shares.oorion.uk/u/2zC.gif",
+            "https://shares.oorion.uk/u/uUB.gif",
+            "https://shares.oorion.uk/u/R6D.gif",
+            "https://shares.oorion.uk/u/p0f.gif",
+            "https://shares.oorion.uk/u/h5v.gif",
+            "https://shares.oorion.uk/u/iYL.gif",
+            "https://shares.oorion.uk/u/2ny.gif",
+            "https://shares.oorion.uk/u/uCb.gif",
+            "https://shares.oorion.uk/u/z6v.gif",
+            "https://shares.oorion.uk/u/cON.gif",
+            "https://shares.oorion.uk/u/Lnk.gif",
+            "https://shares.oorion.uk/u/5QB.gif",
+            "https://shares.oorion.uk/u/t3U.gif",
+            "https://shares.oorion.uk/u/MLU.gif",
+            "https://shares.oorion.uk/u/1gA.gif",
+            "https://shares.oorion.uk/u/6cX.gif",
+            "https://shares.oorion.uk/u/KWy.gif",
+            "https://shares.oorion.uk/u/kcE.gif",
+            "https://shares.oorion.uk/u/zxQ.gif",
+            "https://shares.oorion.uk/u/sjf.gif",
+            "https://shares.oorion.uk/u/Jcr.gif"
+        ];
+
+        // 3. BLUNT PHRASES
         const phrases = [
             "Not my problem.",
             "I don't care.",
@@ -330,6 +342,136 @@
             "I believe in you. You'll figure it out.",
             "My calendar says 'not my problem' all day.",
             "Have you tried asking literally anyone else?",
+            "I'm delegating this back to you.",
+            "That's outside my circle of concern.",
+            "I'm sure it'll resolve itself.",
+            "Let's put a pin in that. And then lose the pin.",
+            "I'm operating at reduced capacity. Like always.",
+            "That's a tomorrow problem. And tomorrow I won't care either.",
+            "I'm out of office. Permanently.",
+            "That's not in my job description.",
+            "I'm unionized. Can't help you.",
+            "Have you tried ignoring it?",
+            "That's a them problem now.",
+            "I'm looking into it. Just kidding, I'm not.",
+            "Not my department.",
+            "I'm on PTO. Mentally.",
+            "That's a future problem.",
+            "I'm delegating to my future self. He doesn't care either.",
+            "Have you tried walking away?",
+            "I'm not ignoring you, I'm prioritizing my peace.",
+            "That's above my clearance level.",
+            "I'm outsourcing this to someone who cares.",
+            "Not my monkey, not my circus.",
+            "I'm taking a personal day. From caring.",
+            "That's a skill issue.",
+            "I'm in a meeting. With myself. About not caring."
+        ];
+
+        // 4. SMART PHRASE SELECTION (Weighted Random)
+        function getPhraseCounts() {
+            const stored = localStorage.getItem('phraseCounts_v2');
+            if (stored) return JSON.parse(stored);
+            const counts = {};
+            phrases.forEach((_, index) => { counts[index] = 0; });
+            return counts;
+        }
+
+        function savePhraseCounts(counts) {
+            localStorage.setItem('phraseCounts_v2', JSON.stringify(counts));
+        }
+
+        function selectPhrase() {
+            const counts = getPhraseCounts();
+            const weights = phrases.map((_, index) => {
+                const count = counts[index] || 0;
+                return Math.pow(count + 1, -0.85); // 0.85x penalty for seen messages
+            });
+            
+            const totalWeight = weights.reduce((sum, weight) => sum + weight, 0);
+            let random = Math.random() * totalWeight;
+            let selectedIndex = 0;
+            
+            for (let i = 0; i < weights.length; i++) {
+                random -= weights[i];
+                if (random <= 0) {
+                    selectedIndex = i;
+                    break;
+                }
+            }
+            
+            counts[selectedIndex] = (counts[selectedIndex] || 0) + 1;
+            savePhraseCounts(counts);
+            return phrases[selectedIndex];
+        }
+
+        // 5. RENDER CONTENT
+        function loadNewContent() {
+            // Random image from the 33 provided
+            const randomImage = imageUrls[Math.floor(Math.random() * imageUrls.length)];
+            document.getElementById('memeImage').src = randomImage;
+            
+            // Weighted random phrase
+            const selectedPhrase = selectPhrase();
+            document.getElementById('quote').textContent = `"${selectedPhrase}"`;
+        }
+
+        // Initial load
+        loadNewContent();
+
+        // Button click handler
+        document.getElementById('reloadBtn').addEventListener('click', (e) => {
+            e.preventDefault(); // Prevent any default touch behaviors
+            loadNewContent();
+        });
+
+        // 6. JUMPSCARE LOGIC
+        function triggerJumpscare() {
+            if (Math.random() < 0.15) { // 15% chance
+                const body = document.body;
+                const flashOverlay = document.getElementById('flashOverlay');
+                const jumpscareText = document.getElementById('jumpscareText');
+                
+                // Haptic feedback (mobile only)
+                if (navigator.vibrate) {
+                    navigator.vibrate([50, 50, 100]);
+                }
+                
+                body.classList.add('shake');
+                setTimeout(() => body.classList.remove('shake'), 400);
+                
+                flashOverlay.classList.add('active');
+                setTimeout(() => flashOverlay.classList.remove('active'), 250);
+                
+                const scaryEmojis = ['💀', '👻', '😱', '🔥', '⚡', '🤡'];
+                jumpscareText.textContent = scaryEmojis[Math.floor(Math.random() * scaryEmojis.length)];
+                jumpscareText.classList.add('active');
+                setTimeout(() => jumpscareText.classList.remove('active'), 500);
+            }
+        }
+
+        // Trigger jumpscare shortly after load
+        setTimeout(triggerJumpscare, 600);
+
+        // 7. BACKGROUND PARTICLES
+        function createParticles() {
+            const container = document.getElementById('particles');
+            for (let i = 0; i < 15; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.animationDuration = (Math.random() * 12 + 8) + 's';
+                particle.style.animationDelay = (Math.random() * 10) + 's';
+                const size = Math.random() * 3 + 1;
+                particle.style.width = size + 'px';
+                particle.style.height = size + 'px';
+                container.appendChild(particle);
+            }
+        }
+        createParticles();
+    </script>
+</body>
+</html>else?",
             "I'm delegating this back to you.",
             "That's outside my circle of concern.",
             "I'm sure it'll resolve itself.",
